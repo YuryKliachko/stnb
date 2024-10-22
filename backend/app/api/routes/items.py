@@ -1,11 +1,12 @@
 import uuid
-from typing import Any
+from typing import Annotated, Any, Sequence
 
-from fastapi import APIRouter, HTTPException
+from click import File
+from fastapi import APIRouter, Form, HTTPException, UploadFile
 from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
-from app.models import Item, ItemCreate, ItemPublic, ItemsPublic, ItemUpdate, Message
+from app.models import DocumentType, Item, ItemCreate, ItemPublic, ItemsPublic, ItemUpdate, Message
 
 router = APIRouter()
 
@@ -56,12 +57,16 @@ def read_item(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> 
 
 @router.post("/", response_model=ItemPublic)
 def create_item(
-    *, session: SessionDep, current_user: CurrentUser, item_in: ItemCreate
+    *, session: SessionDep,
+    current_user: CurrentUser,
+    title: str = Form(...),
+    file: UploadFile = File(...)
 ) -> Any:
     """
     Create new item.
     """
-    item = Item.model_validate(item_in, update={"owner_id": current_user.id})
+    print(file)
+    item = Item.model_validate({"title": title}, update={"owner_id": current_user.id})
     session.add(item)
     session.commit()
     session.refresh(item)
@@ -107,3 +112,12 @@ def delete_item(
     session.delete(item)
     session.commit()
     return Message(message="Item deleted successfully")
+
+
+@router.get("/types")
+def get_document_types(
+    session: SessionDep, current_user: CurrentUser
+) -> Sequence[DocumentType]:
+    stmt = select(DocumentType)
+    results = session.exec(stmt)
+    return results.all()

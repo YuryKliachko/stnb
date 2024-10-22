@@ -14,7 +14,6 @@ import type {
   UsersPublic,
   UserUpdate,
   UserUpdateMe,
-  ItemCreate,
   ItemPublic,
   ItemsPublic,
   ItemUpdate,
@@ -405,7 +404,7 @@ export type TDataReadItems = {
   skip?: number
 }
 export type TDataCreateItem = {
-  requestBody: ItemCreate
+  requestBody: FormData
 }
 export type TDataReadItem = {
   id: string
@@ -456,7 +455,6 @@ export class ItemsService {
       method: "POST",
       url: "/api/v1/items/",
       body: requestBody,
-      mediaType: "application/json",
       errors: {
         422: `Validation Error`,
       },

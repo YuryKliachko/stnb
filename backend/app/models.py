@@ -1,7 +1,9 @@
 import uuid
 
 from pydantic import EmailStr
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship, SQLModel, Enum
+
+from app.constants import DocumentTypeEnum as DocTypeEnum, FileExtension
 
 
 # Shared properties
@@ -112,3 +114,9 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=40)
+
+
+class DocumentType(SQLModel, table=True):
+    id: int | None = Field(primary_key=True, default=None)
+    type: DocTypeEnum = Field(sa_column=Enum(DocTypeEnum))
+    file_extension: FileExtension = Field(sa_column=Enum(FileExtension))

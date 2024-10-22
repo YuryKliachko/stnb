@@ -18,7 +18,7 @@ import { z } from "zod"
 import { ItemsService } from "../../client"
 import ActionsMenu from "../../components/Common/ActionsMenu"
 import Navbar from "../../components/Common/Navbar"
-import AddItem from "../../components/Items/AddItem"
+import AddReport from "../../components/Items/AddItem"
 import { PaginationFooter } from "../../components/Common/PaginationFooter.tsx"
 
 const itemsSearchSchema = z.object({
@@ -71,9 +71,9 @@ function ItemsTable() {
         <Table size={{ base: "sm", md: "md" }}>
           <Thead>
             <Tr>
-              <Th>ID</Th>
               <Th>Title</Th>
-              <Th>Description</Th>
+              <Th>Number of rows</Th>
+              <Th>Created at</Th>
               <Th>Actions</Th>
             </Tr>
           </Thead>
@@ -91,16 +91,14 @@ function ItemsTable() {
             <Tbody>
               {items?.data.map((item) => (
                 <Tr key={item.id} opacity={isPlaceholderData ? 0.5 : 1}>
-                  <Td>{item.id}</Td>
                   <Td isTruncated maxWidth="150px">
                     {item.title}
                   </Td>
+                  <Td >{item.rowsCount || "N/A"}</Td>
                   <Td
                     color={!item.description ? "ui.dim" : "inherit"}
-                    isTruncated
-                    maxWidth="150px"
                   >
-                    {item.description || "N/A"}
+                    {item.createdAt || "N/A"}
                   </Td>
                   <Td>
                     <ActionsMenu type={"Item"} value={item} />
@@ -125,10 +123,10 @@ function Items() {
   return (
     <Container maxW="full">
       <Heading size="lg" textAlign={{ base: "center", md: "left" }} pt={12}>
-        Items Management
+        Reports
       </Heading>
 
-      <Navbar type={"Item"} addModalAs={AddItem} />
+      <Navbar type={"Report"} addModalAs={AddReport} />
       <ItemsTable />
     </Container>
   )

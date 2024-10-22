@@ -14,7 +14,9 @@ import {
 } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { type SubmitHandler, useForm } from "react-hook-form"
+import { useState } from 'react';
 
+import FileUpload from "../Common/FileUpload"
 import { type ApiError, type ItemCreate, ItemsService } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import { handleError } from "../../utils"
@@ -24,7 +26,7 @@ interface AddItemProps {
   onClose: () => void
 }
 
-const AddItem = ({ isOpen, onClose }: AddItemProps) => {
+const AddReport = ({ isOpen, onClose }: AddItemProps) => {
   const queryClient = useQueryClient()
   const showToast = useCustomToast()
   const {
@@ -32,17 +34,18 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<ItemCreate>({
+  } = useForm<FormData>({
     mode: "onBlur",
     criteriaMode: "all",
-    defaultValues: {
-      title: "",
-      description: "",
-    },
   })
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const handleFileChange = (file: File) => {
+    setSelectedFile(file); // Update the selected file state when a file is chosen
+  };
 
   const mutation = useMutation({
-    mutationFn: (data: ItemCreate) =>
+    mutationFn: (data: FormData) =>
       ItemsService.createItem({ requestBody: data }),
     onSuccess: () => {
       showToast("Success!", "Item created successfully.", "success")
@@ -58,7 +61,10 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
   })
 
   const onSubmit: SubmitHandler<ItemCreate> = (data) => {
-    mutation.mutate(data)
+    const formData = new FormData()
+    formData.append("title", data.title)
+    formData.append("file", selectedFile)
+    mutation.mutate(formData)
   }
 
   return (
@@ -67,11 +73,11 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
         isOpen={isOpen}
         onClose={onClose}
         size={{ base: "sm", md: "md" }}
-        isCentered
+        isCentered 
       >
         <ModalOverlay />
         <ModalContent as="form" onSubmit={handleSubmit(onSubmit)}>
-          <ModalHeader>Add Item</ModalHeader>
+          <ModalHeader>Add report</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6}>
             <FormControl isRequired isInvalid={!!errors.title}>
@@ -88,15 +94,7 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
                 <FormErrorMessage>{errors.title.message}</FormErrorMessage>
               )}
             </FormControl>
-            <FormControl mt={4}>
-              <FormLabel htmlFor="description">Description</FormLabel>
-              <Input
-                id="description"
-                {...register("description")}
-                placeholder="Description"
-                type="text"
-              />
-            </FormControl>
+            <FileUpload fileType={".csv" } onFileSelect={handleFileChange}></FileUpload>
           </ModalBody>
 
           <ModalFooter gap={3}>
@@ -111,4 +109,4 @@ const AddItem = ({ isOpen, onClose }: AddItemProps) => {
   )
 }
 
-export default AddItem
+export default AddReport
